@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASR Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .chat-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+        }
+
+        #recordButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #recordButton:hover {
+            background-color: #0056b3;
+        }
+
+        #recordButton.recording {
+            background-color: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+
+        #recordButton.recording::after {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #fff;
+            border-radius: 50%;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        #waveform {
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        #playButton {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #playButton:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div id="chatMessages"></div>
+    </div>
+    <div class="controls">
+        <button id="recordButton">Record</button>
+        <div id="waveform"></div>
+        <button id="playButton">Play</button>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        const recordButton = document.getElementById('recordButton');
+        const playButton = document.getElementById('playButton');
+        
+        // Initialize WaveSurfer
+        const wavesurfer = WaveSurfer.create({
+            container: '#waveform',
+            waveColor: '#4F4A85',
+            progressColor: '#383351',
+            cursorColor: '#383351',
+            barWidth: 3,
+            barRadius: 3,
+            responsive: true,
+            height: 50,
+            normalize: true,
+        });
+
+        recordButton.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioChunks = [];
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    // Load audio into wavesurfer
+                    wavesurfer.loadBlob(audioBlob);
+                    
+                    recordButton.textContent = 'Record';
+                    recordButton.classList.remove('recording');
+
+                    await sendAudioToServer(audioBlob);
+                };
+
+                mediaRecorder.start();
+                recordButton.textContent = 'Stop Recording';
+                recordButton.classList.add('recording');
+            } else {
+                mediaRecorder.stop();
+            }
+        });
+
+        playButton.addEventListener('click', () => {
+            if (wavesurfer.isPlaying()) {
+                wavesurfer.pause();
+                playButton.textContent = 'Play';
+            } else {
+                wavesurfer.play();
+                playButton.textContent = 'Pause';
+            }
+        });
+
+        async function sendAudioToServer(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio', audioBlob);
+
+            const response = await fetch('/process-audio', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.margin = '10px 0';
+            messageDiv.style.padding = '10px';
+            messageDiv.style.backgroundColor = '#e9ecef';
+            messageDiv.style.borderRadius = '10px';
+            messageDiv.textContent = result.transcription;
+            chatMessages.appendChild(messageDiv);
+        }
+    </script>
+</body>
+</html>
