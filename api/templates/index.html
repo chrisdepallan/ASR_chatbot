@@ -96,6 +96,32 @@
         #playButton:hover {
             background-color: #218838;
         }
+
+        #transcribeButton {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #transcribeButton:hover {
+            background-color: #5a6268;
+        }
+
+        .arrow-icon {
+            width: 0;
+            height: 0;
+            border-left: 8px solid white;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            margin-left: 5px;
+        }
     </style>
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 </head>
@@ -107,6 +133,10 @@
         <button id="recordButton">Record</button>
         <div id="waveform"></div>
         <button id="playButton">Play</button>
+        <button id="transcribeButton">
+            Transcribe
+            <span class="arrow-icon"></span>
+        </button>
     </div>
 
     <script>
@@ -169,24 +199,50 @@
             }
         });
 
+        document.getElementById('transcribeButton').addEventListener('click', async () => {
+            if (wavesurfer.backend.buffer) {
+                // Convert AudioBuffer to Blob
+                const audioData = wavesurfer.backend.buffer;
+                const audioBlob = await audioBufferToWav(audioData);
+                await sendAudioToServer(audioBlob);
+            } else {
+                alert('Please record or load audio first');
+            }
+        });
+
+        // Helper function to convert AudioBuffer to WAV Blob
+        function audioBufferToWav(buffer) {
+            return new Promise(resolve => {
+                const numberOfChannels = buffer.numberOfChannels;
+                const sampleRate = buffer.sampleRate;
+                const wavesurferBlob = wavesurfer.getDecodedData();
+                resolve(new Blob([wavesurferBlob], { type: 'audio/wav' }));
+            });
+        }
+
         async function sendAudioToServer(audioBlob) {
             const formData = new FormData();
-            formData.append('audio', audioBlob);
+            formData.append('file', audioBlob, 'recording.wav');
 
-            const response = await fetch('/process-audio', {
-                method: 'POST',
-                body: formData
-            });
+            try {
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            const result = await response.json();
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.style.margin = '10px 0';
-            messageDiv.style.padding = '10px';
-            messageDiv.style.backgroundColor = '#e9ecef';
-            messageDiv.style.borderRadius = '10px';
-            messageDiv.textContent = result.transcription;
-            chatMessages.appendChild(messageDiv);
+                const result = await response.json();
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.style.margin = '10px 0';
+                messageDiv.style.padding = '10px';
+                messageDiv.style.backgroundColor = '#e9ecef';
+                messageDiv.style.borderRadius = '10px';
+                messageDiv.textContent = result.transcription;
+                chatMessages.appendChild(messageDiv);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error transcribing audio');
+            }
         }
     </script>
 </body>
