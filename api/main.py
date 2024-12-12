@@ -4,11 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-import asyncio
-
-# Configure asyncio to use the new style
-if hasattr(asyncio, 'set_event_loop_policy'):
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
