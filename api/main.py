@@ -8,11 +8,17 @@ from dotenv import load_dotenv
 app = FastAPI()
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from .env file in development
+if os.path.exists(".env"):
+    load_dotenv()
+
+# Get API key with error handling
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
 
 # Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=api_key)
 
 @app.get("/")
 async def read_root(request: Request):
