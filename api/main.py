@@ -4,8 +4,15 @@ from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 app = FastAPI()
+
+# Add middlewares
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
+app.add_middleware(HTTPSRedirectMiddleware)
+
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
 # Load environment variables from .env file in development
@@ -58,6 +65,5 @@ async def transcribe_audio(file: UploadFile = File(...)):
         return {"status": "success", "transcription": transcription.text}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
 
 
