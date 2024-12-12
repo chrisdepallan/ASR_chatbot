@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
 # Load environment variables
 load_dotenv()
