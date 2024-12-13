@@ -4,25 +4,15 @@ from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-<<<<<<< HEAD
 from fastapi.responses import Response
 # from fastapi.middleware.trustedhost import TrustedHostMiddleware
 # from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-=======
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
->>>>>>> parent of 5ea0da7 (test to audio demo)
 
 app = FastAPI()
 
 # # Add middlewares
-<<<<<<< HEAD
 # app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
 # app.add_middleware(HTTPSRedirectMiddleware)
-=======
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com", "localhost"])
-app.add_middleware(HTTPSRedirectMiddleware)
->>>>>>> parent of 5ea0da7 (test to audio demo)
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
