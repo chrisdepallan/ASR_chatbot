@@ -14,7 +14,7 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"
 app.add_middleware(HTTPSRedirectMiddleware)
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
-
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 # Load environment variables from .env file in development
 if os.path.exists(".env"):
     load_dotenv()
