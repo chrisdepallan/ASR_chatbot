@@ -10,8 +10,8 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 app = FastAPI()
 
 # Add middlewares
-# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
-# app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
+app.add_middleware(HTTPSRedirectMiddleware)
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
