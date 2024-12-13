@@ -5,6 +5,9 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from fastapi.responses import Response
+from pathlib import Path
+from fastapi.responses import FileResponse
+import uuid
 # from fastapi.middleware.trustedhost import TrustedHostMiddleware
 # from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
@@ -74,14 +77,38 @@ async def chat_completion(request: Request):
         data = await request.json()
         user_message = data.get("message")
         
+        # Get chat completion
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # or "gpt-4" if you have access
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": user_message}
             ]
         )
         
-        return {"status": "success", "response": response.choices[0].message.content}
+        response_text = response.choices[0].message.content
+        
+        # Generate speech from the response
+        speech_file_name = f"speech_{uuid.uuid4()}.mp3"
+        speech_file_path = Path(__file__).parent / "static" / "audio" / speech_file_name
+        
+        # Ensure the audio directory exists
+        speech_file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Generate speech
+        audio_response = client.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=response_text
+        )
+        
+        # Save the audio file
+        audio_response.stream_to_file(str(speech_file_path))
+        
+        return {
+            "status": "success", 
+            "response": response_text,
+            "audio_url": f"/static/audio/{speech_file_name}"
+        }
     except Exception as e:
         return {"status": "error", "message": str(e)}

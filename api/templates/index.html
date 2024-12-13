@@ -149,11 +149,16 @@
                 assistantMessageDiv.innerHTML = formattedText;
                 chatMessages.appendChild(assistantMessageDiv);
 
+                // Play the response audio if available
+                if (chatResult.audio_url) {
+                    const audio = new Audio(chatResult.audio_url);
+                    audio.play();
+                }
+
                 // Scroll to bottom of chat
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
-                print(error)
                 alert('Error processing audio');
             }
         }
