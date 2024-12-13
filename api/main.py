@@ -10,8 +10,8 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 app = FastAPI()
 
 # Add middlewares
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
-app.add_middleware(HTTPSRedirectMiddleware)
+# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
+# app.add_middleware(HTTPSRedirectMiddleware)
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
@@ -67,3 +67,20 @@ async def transcribe_audio(file: UploadFile = File(...)):
         return {"status": "error", "message": str(e)}
 
 
+@app.post("/chat")
+async def chat_completion(request: Request):
+    try:
+        data = await request.json()
+        user_message = data.get("message")
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # or "gpt-4" if you have access
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        
+        return {"status": "success", "response": response.choices[0].message.content}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
