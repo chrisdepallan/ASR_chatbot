@@ -4,15 +4,25 @@ from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+<<<<<<< HEAD
 from fastapi.responses import Response
 # from fastapi.middleware.trustedhost import TrustedHostMiddleware
 # from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+=======
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+>>>>>>> parent of 5ea0da7 (test to audio demo)
 
 app = FastAPI()
 
 # # Add middlewares
+<<<<<<< HEAD
 # app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com"])
 # app.add_middleware(HTTPSRedirectMiddleware)
+=======
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["ust.chrisdepallan.com", "localhost"])
+app.add_middleware(HTTPSRedirectMiddleware)
+>>>>>>> parent of 5ea0da7 (test to audio demo)
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
@@ -32,8 +42,6 @@ client = OpenAI(api_key=api_key)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-
-
 @app.get("/test-openai")
 async def test_openai():
     try:
@@ -46,8 +54,6 @@ async def test_openai():
         return {"status": "success", "message": "OpenAI API is working correctly"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
-
 
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
@@ -87,25 +93,5 @@ async def chat_completion(request: Request):
         )
         
         return {"status": "success", "response": response.choices[0].message.content}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
-@app.post("/text-to-speech")
-async def text_to_speech(request: Request):
-    try:
-        data = await request.json()
-        text = data.get("text")
-        
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="alloy",
-            input=text
-        )
-        
-        # Return the audio data directly
-        return Response(
-            content=response.content,
-            media_type="audio/mpeg"
-        )
     except Exception as e:
         return {"status": "error", "message": str(e)}

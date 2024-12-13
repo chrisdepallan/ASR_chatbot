@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASR Chatbot for UST</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 </head>
 <body>
@@ -16,7 +16,11 @@
         <div id="waveform"></div>
         <button id="playButton">Play</button>
         <button id="transcribeButton">
+<<<<<<< HEAD
             
+=======
+            Transcribe
+>>>>>>> parent of 5ea0da7 (test to audio demo)
             <span class="arrow-icon"></span>
         </button>
     </div>
@@ -26,7 +30,6 @@
         let audioChunks = [];
         const recordButton = document.getElementById('recordButton');
         const playButton = document.getElementById('playButton');
-        let messageCounter = 0;
         
         // Initialize WaveSurfer
         const wavesurfer = WaveSurfer.create({
@@ -140,58 +143,15 @@
                 const assistantMessageDiv = document.createElement('div');
                 assistantMessageDiv.className = 'message assistant-message';
                 
-                // Create a container for the message and TTS button
-                const messageContainer = document.createElement('div');
-                messageContainer.className = 'message-container';
-                
-                // Add play button and audio element
-                const audioId = `tts-audio-${messageCounter++}`;
-                const playTTSButton = document.createElement('button');
-                playTTSButton.className = 'play-tts-button';
-                playTTSButton.innerHTML = '🔊'; // Speaker emoji
-                playTTSButton.onclick = async () => {
-                    try {
-                        const ttsResponse = await fetch('/text-to-speech', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                text: chatResult.response
-                            })
-                        });
-                        
-                        if (ttsResponse.ok) {
-                            const audioBlob = await ttsResponse.blob();
-                            const audioUrl = URL.createObjectURL(audioBlob);
-                            const audioElement = document.getElementById(audioId);
-                            audioElement.src = audioUrl;
-                            audioElement.play();
-                        }
-                    } catch (error) {
-                        console.error('Error playing TTS:', error);
-                        alert('Error playing audio');
-                    }
-                };
-
-                const audioElement = document.createElement('audio');
-                audioElement.id = audioId;
-                
-                // Convert markdown and format text as before
+                // Convert markdown-style code blocks and format text
                 const formattedText = chatResult.response
                     .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language, code) => {
                         return `<pre><code class="language-${language || ''}">${code.trim()}</code></pre>`;
                     })
-                    .replace(/\n/g, '<br>');
+                    .replace(/\n/g, '<br>');  // Convert newlines to <br> tags
                 
                 assistantMessageDiv.innerHTML = formattedText;
-                
-                // Assemble the message container
-                messageContainer.appendChild(playTTSButton);
-                messageContainer.appendChild(assistantMessageDiv);
-                messageContainer.appendChild(audioElement);
-                
-                chatMessages.appendChild(messageContainer);
+                chatMessages.appendChild(assistantMessageDiv);
 
                 // Scroll to bottom of chat
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -202,31 +162,5 @@
             }
         }
     </script>
-
-    <style>
-        .message-container {
-            display: flex;
-            align-items: flex-start;
-            margin: 10px 0;
-        }
-
-        .play-tts-button {
-            margin-right: 10px;
-            padding: 5px 10px;
-            background: #4F4A85;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-        }
-
-        .play-tts-button:hover {
-            background: #383351;
-        }
-
-        audio {
-            display: none;
-        }
-    </style>
 </body>
 </html>
