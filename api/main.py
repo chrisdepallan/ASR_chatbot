@@ -30,11 +30,11 @@ if not api_key:
 
 # Initialize OpenAI client
 client = OpenAI(api_key=api_key)
-
+# home page
 @app.get("/")
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
+# test openai
 @app.get("/test-openai")
 async def test_openai():
     try:
@@ -48,6 +48,8 @@ async def test_openai():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+# transcribe audio endpoint
+#not used anymore but could be used for future
 @app.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
     try:
@@ -70,7 +72,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-
+# chat completion endpoint
 @app.post("/chat")
 async def chat_completion(request: Request):
     try:
