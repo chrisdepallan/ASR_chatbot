@@ -78,14 +78,12 @@ async def chat_completion(request: Request):
     try:
         data = await request.json()
         user_message = data.get("message")
+        conversation_history = data.get("conversation_history", [])
         
         # Get chat completion
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": user_message}
-            ]
+            messages=conversation_history
         )
         
         response_text = response.choices[0].message.content

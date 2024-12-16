@@ -15,7 +15,7 @@
         <button id="recordButton">Record</button>
         <div id="waveform"></div>
         <button id="playButton">Play</button>
-        <button id="transcribeButton">
+        <button id="transcribeButton" style="display: none;">
             
             <span class="arrow-icon"></span>
         </button>
@@ -39,6 +39,10 @@
             height: 50,
             normalize: true,
         });
+
+        let conversationHistory = [
+            {"role": "system", "content": "You are a helpful assistant."}
+        ];
 
         recordButton.addEventListener('click', async () => {
             if (!mediaRecorder || mediaRecorder.state === 'inactive') {
@@ -122,19 +126,32 @@
                 userMessageDiv.textContent = transcriptionResult.transcription;
                 chatMessages.appendChild(userMessageDiv);
 
-                // Then, get the chat completion
+                // Add user message to conversation history
+                conversationHistory.push({
+                    "role": "user",
+                    "content": transcriptionResult.transcription
+                });
+
+                // Then, get the chat completion with full conversation history
                 const chatResponse = await fetch('/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        message: transcriptionResult.transcription
+                        message: transcriptionResult.transcription,
+                        conversation_history: conversationHistory
                     })
                 });
 
                 const chatResult = await chatResponse.json();
                 
+                // Add assistant's response to conversation history
+                conversationHistory.push({
+                    "role": "assistant",
+                    "content": chatResult.response
+                });
+
                 // Display assistant's response with formatting
                 const assistantMessageDiv = document.createElement('div');
                 assistantMessageDiv.className = 'message assistant-message';
@@ -157,6 +174,15 @@
 
                 // Scroll to bottom of chat
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Optional: Limit conversation history to prevent too long contexts
+                if (conversationHistory.length > 10) {
+                    // Keep system message and last 9 messages
+                    conversationHistory = [
+                        conversationHistory[0],
+                        ...conversationHistory.slice(-9)
+                    ];
+                }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error processing audio');
