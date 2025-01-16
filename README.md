@@ -1,4 +1,5 @@
-# ASR Chatbot with OpenAI Integration
+# User-Centric Speech Tool
+## ASR Chatbot with OpenAI Integration
 
 A web-based chatbot application that combines speech recognition, text-to-speech, and natural language processing capabilities using OpenAI's APIs.
 
@@ -25,7 +26,7 @@ This project leverages AI not only in its core functionality but also in its dev
   - Wave animation effects were refined with AI assistance
   - Color scheme recommendations were provided by AI
   
-- 💻 Code Generation
+- 💻 Code Generation  
   - Basic HTML structure was scaffolded with AI help
   - JavaScript event handlers were initially drafted using AI
   - WaveSurfer.js integration was guided by AI suggestions
@@ -42,7 +43,7 @@ While AI was instrumental in accelerating development, all code was reviewed, te
 
 
 ## Prerequisites
-
+ 
 - Python 3.8+
 - OpenAI API key
 - Modern web browser with microphone support
