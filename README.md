@@ -1,4 +1,4 @@
-# User-Centric Speech Tool
+# User-centric Speech Tool
 ## ASR Chatbot with OpenAI Integration
 
 A web-based chatbot application that combines speech recognition, text-to-speech, and natural language processing capabilities using OpenAI's APIs.
